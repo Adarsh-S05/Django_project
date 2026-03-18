@@ -98,15 +98,81 @@
 
             <!-- Tabs -->
             <div class="stats-tabs">
-                <button class="stats-tab active" onclick="showTab('year-by-year')">📅 Year by Year</button>
+                <button class="stats-tab active" onclick="showTab('formats')">🏆 Formats</button>
+                <button class="stats-tab" onclick="showTab('year-by-year')">📅 Year by Year</button>
                 <button class="stats-tab" onclick="showTab('vs-teams')">🆚 vs Teams</button>
                 <button class="stats-tab" onclick="showTab('grounds')">🏟️ Grounds</button>
                 <button class="stats-tab" onclick="showTab('phase')">⏱️ Phase Analysis</button>
                 <button class="stats-tab" onclick="showTab('strengths')">💪 Strengths</button>
             </div>
 
+            <!-- Formats Tab -->
+            <div class="tab-panel active" id="tab-formats">
+                <div class="data-table-container">
+                    <h3>🏆 Batting by Format</h3>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Format</th>
+                                <th>Inn</th>
+                                <th>Runs</th>
+                                <th>Avg</th>
+                                <th>SR</th>
+                                <th>4s</th>
+                                <th>6s</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for stat in format_batting_stats %}
+                            <tr>
+                                <td class="highlight-value">{{ stat.match_type }}</td>
+                                <td>{{ stat.innings }}</td>
+                                <td>{{ stat.total_runs }}</td>
+                                <td>{{ stat.avg|floatformat:1 }}</td>
+                                <td>{{ stat.avg_sr|floatformat:1 }}</td>
+                                <td>{{ stat.total_fours }}</td>
+                                <td>{{ stat.total_sixes }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr><td colspan="7" style="text-align: center; color: var(--text-muted);">No format data available</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                {% if format_bowling_stats %}
+                <div class="data-table-container">
+                    <h3>🎳 Bowling by Format</h3>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Format</th>
+                                <th>Inn</th>
+                                <th>Overs</th>
+                                <th>Wickets</th>
+                                <th>Runs</th>
+                                <th>Econ</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for stat in format_bowling_stats %}
+                            <tr>
+                                <td class="highlight-value">{{ stat.match_type }}</td>
+                                <td>{{ stat.innings }}</td>
+                                <td>{{ stat.total_overs|floatformat:1 }}</td>
+                                <td>{{ stat.total_wickets }}</td>
+                                <td>{{ stat.total_runs }}</td>
+                                <td>{{ stat.avg_econ|floatformat:1 }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% endif %}
+            </div>
+
             <!-- Year by Year Tab -->
-            <div class="tab-panel active" id="tab-year-by-year">
+            <div class="tab-panel" id="tab-year-by-year">
                 <div class="data-table-container">
                     <h3>📅 Year-by-Year Batting Performance</h3>
                     <table class="data-table">

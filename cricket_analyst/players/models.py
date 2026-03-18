@@ -69,6 +69,7 @@ class Player(models.Model):
     half_centuries = models.IntegerField(default=0)
     catches = models.IntegerField(default=0)
     stumpings = models.IntegerField(default=0)
+    run_outs = models.IntegerField(default=0)
 
     def __str__(self):
         return self.name
@@ -82,6 +83,12 @@ class BattingInnings(models.Model):
     opponent = models.ForeignKey(Team, on_delete=models.CASCADE, related_name='batting_against')
     ground = models.ForeignKey(Ground, on_delete=models.SET_NULL, null=True, blank=True)
     year = models.IntegerField()
+    match_type = models.CharField(max_length=20, choices=[
+        ('Test', 'Test'),
+        ('ODI', 'ODI'),
+        ('T20I', 'T20I'),
+        ('IPL', 'IPL'),
+    ], default='IPL')
     runs = models.IntegerField(default=0)
     balls_faced = models.IntegerField(default=0)
     fours = models.IntegerField(default=0)
@@ -106,6 +113,12 @@ class BowlingInnings(models.Model):
     opponent = models.ForeignKey(Team, on_delete=models.CASCADE, related_name='bowling_against')
     ground = models.ForeignKey(Ground, on_delete=models.SET_NULL, null=True, blank=True)
     year = models.IntegerField()
+    match_type = models.CharField(max_length=20, choices=[
+        ('Test', 'Test'),
+        ('ODI', 'ODI'),
+        ('T20I', 'T20I'),
+        ('IPL', 'IPL'),
+    ], default='IPL')
     overs = models.FloatField(default=0.0)
     maidens = models.IntegerField(default=0)
     runs_conceded = models.IntegerField(default=0)

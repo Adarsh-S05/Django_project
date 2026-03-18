@@ -74,6 +74,21 @@ class Command(BaseCommand):
         self.stdout.write(f"  ✅ Created {len(grounds)} grounds")
 
         # ---- PLAYERS ----
+        import urllib.parse
+        REAL_PHOTOS = {
+            'Virat Kohli': 'https://upload.wikimedia.org/wikipedia/commons/e/ef/Virat_Kohli_during_the_India_vs_Aus_4th_Test_match_at_Narendra_Modi_Stadium_on_09_March_2023.jpg',
+            'Rohit Sharma': 'https://upload.wikimedia.org/wikipedia/commons/f/f7/Rohit_Sharma_November_2023_%28cropped%29.jpg',
+            'MS Dhoni': 'https://upload.wikimedia.org/wikipedia/commons/7/70/Mahendra_Singh_Dhoni_January_2016_%28cropped%29.jpg',
+            'Jasprit Bumrah': 'https://upload.wikimedia.org/wikipedia/commons/d/df/Jasprit_Bumrah_at_PMO_India.jpg',
+            'AB de Villiers': 'https://upload.wikimedia.org/wikipedia/commons/1/1b/AB_de_Villiers_%2822180598822%29_%28cropped%29.jpg',
+            'Hardik Pandya': 'https://upload.wikimedia.org/wikipedia/commons/b/b8/Hardik_Pandya_at_PMO_India.jpg',
+            'KL Rahul': 'https://upload.wikimedia.org/wikipedia/commons/b/ba/KL_Rahul_in_2018.jpg',
+            'Shubman Gill': 'https://upload.wikimedia.org/wikipedia/commons/6/62/Shubman_Gill_during_BGT_matches_-_2_-_Cropped.jpg',
+            'Suryakumar Yadav': 'https://upload.wikimedia.org/wikipedia/commons/1/13/Surya_Yadav.jpg',
+            'Rishabh Pant': 'https://upload.wikimedia.org/wikipedia/commons/a/ad/Rishabh_Pant_%28cropped%29.jpg',
+            'Ravindra Jadeja': 'https://upload.wikimedia.org/wikipedia/commons/0/07/Ravindra_Jadeja_at_PMO_India.jpg'
+        }
+        
         players_data = [
             # (name, country, is_overseas, role, batting_style, bowling_style, ipl_team_short, bio,
             #  matches, runs, wickets, bat_avg, bowl_avg, sr, econ, high, best_bowl, 100s, 50s, catches, stumpings)
@@ -290,6 +305,8 @@ class Command(BaseCommand):
              matches, runs, wickets, bat_avg, bowl_avg, sr, econ, high, best_bowl,
              centuries, fifties, catches, stumpings) = p
 
+            pic_url = REAL_PHOTOS.get(name, f"https://api.dicebear.com/9.x/micah/svg?seed={urllib.parse.quote(name)}&backgroundColor=b6e3f4,c0aede,d1d4f9")
+
             player = Player.objects.create(
                 name=name,
                 country=country,
@@ -298,6 +315,7 @@ class Command(BaseCommand):
                 batting_style=bat_style,
                 bowling_style=bowl_style,
                 ipl_team=teams.get(ipl_short),
+                photo_url=pic_url,
                 bio=bio,
                 total_matches=matches,
                 total_runs=runs,
@@ -332,6 +350,7 @@ class Command(BaseCommand):
                 num_innings = random.randint(20, 60)
                 for _ in range(num_innings):
                     year = random.choice(years)
+                    match_type = random.choice(['Test', 'ODI', 'T20I', 'IPL'])
                     opponent = random.choice(ipl_team_objs)
                     ground = random.choice(indian_grounds)
                     phase = random.choice(['powerplay', 'middle', 'death'])
@@ -346,6 +365,7 @@ class Command(BaseCommand):
 
                     batting_innings_batch.append(BattingInnings(
                         player=player,
+                        match_type=match_type,
                         opponent=opponent,
                         ground=ground,
                         year=year,
@@ -363,11 +383,17 @@ class Command(BaseCommand):
                 num_innings = random.randint(20, 50)
                 for _ in range(num_innings):
                     year = random.choice(years)
+                    match_type = random.choice(['Test', 'ODI', 'T20I', 'IPL'])
                     opponent = random.choice(ipl_team_objs)
                     ground = random.choice(indian_grounds)
                     phase = random.choice(['powerplay', 'middle', 'death'])
 
                     overs = round(random.uniform(1, 4), 1)
+                    if match_type == 'Test':
+                        overs = round(random.uniform(10, 25), 1)
+                    elif match_type == 'ODI':
+                        overs = round(random.uniform(5, 10), 1)
+
                     base_econ = player.economy_rate if player.economy_rate > 0 else 8.0
                     runs_conceded = max(0, int(overs * random.gauss(base_econ, 2)))
                     wickets = random.choices([0, 1, 2, 3, 4], weights=[40, 30, 20, 7, 3])[0]
@@ -375,6 +401,7 @@ class Command(BaseCommand):
 
                     bowling_innings_batch.append(BowlingInnings(
                         player=player,
+                        match_type=match_type,
                         opponent=opponent,
                         ground=ground,
                         year=year,

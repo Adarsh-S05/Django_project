@@ -156,6 +156,35 @@ def player_detail(request, pk):
         .order_by('phase')
     )
 
+    # Format-wise batting
+    format_batting_stats = (
+        BattingInnings.objects.filter(player=player)
+        .values('match_type')
+        .annotate(
+            innings=Count('id'),
+            total_runs=Sum('runs'),
+            avg=Avg('runs'),
+            avg_sr=Avg('strike_rate'),
+            total_fours=Sum('fours'),
+            total_sixes=Sum('sixes'),
+        )
+        .order_by('match_type')
+    )
+
+    # Format-wise bowling
+    format_bowling_stats = (
+        BowlingInnings.objects.filter(player=player)
+        .values('match_type')
+        .annotate(
+            innings=Count('id'),
+            total_overs=Sum('overs'),
+            total_wickets=Sum('wickets'),
+            total_runs=Sum('runs_conceded'),
+            avg_econ=Avg('economy'),
+        )
+        .order_by('match_type')
+    )
+
     return render(request, 'players/player_detail.html', {
         'player': player,
         'year_batting_stats': year_batting_stats,
@@ -165,6 +194,8 @@ def player_detail(request, pk):
         'ground_batting_stats': ground_batting_stats,
         'phase_batting_stats': phase_batting_stats,
         'phase_bowling_stats': phase_bowling_stats,
+        'format_batting_stats': format_batting_stats,
+        'format_bowling_stats': format_bowling_stats,
     })
 
 
