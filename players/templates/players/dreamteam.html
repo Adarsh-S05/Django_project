@@ -1,0 +1,388 @@
+{% extends "base.html" %}
+
+{% block title %}Dream XI Builder — Cricket Analyst{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: var(--space-xl);">
+    <div class="section-header">
+        <h1 class="section-title">⭐ Dream <span class="accent">XI</span> Builder</h1>
+        <div style="display: flex; gap: var(--space-sm);">
+            <a href="{% url 'dreamteam_list_view' %}" class="btn btn-secondary btn-sm">📋 Saved Teams</a>
+        </div>
+    </div>
+
+    <div class="dreamteam-layout">
+        <!-- Left: Player List -->
+        <div class="dreamteam-player-list">
+            <h3>👥 Available Players</h3>
+            <input type="text" class="dt-search-box" id="dt-search" placeholder="Search players...">
+
+            <div style="display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: var(--space-sm);">
+                <button class="filter-btn active btn-sm" onclick="filterDTPlayers('')" data-role="">All</button>
+                <button class="filter-btn btn-sm" onclick="filterDTPlayers('Batsman')" data-role="Batsman">BAT</button>
+                <button class="filter-btn btn-sm" onclick="filterDTPlayers('Bowler')" data-role="Bowler">BOWL</button>
+                <button class="filter-btn btn-sm" onclick="filterDTPlayers('All-Rounder')" data-role="All-Rounder">AR</button>
+                <button class="filter-btn btn-sm" onclick="filterDTPlayers('WK-Batsman')" data-role="WK-Batsman">WK</button>
+            </div>
+
+            <div id="dt-player-list">
+                {% for player in all_players %}
+                <div class="dt-player-item"
+                     draggable="true"
+                     data-player-id="{{ player.pk }}"
+                     data-player-name="{{ player.name }}"
+                     data-player-role="{{ player.role }}"
+                     data-player-country="{{ player.country }}"
+                     data-player-overseas="{{ player.is_overseas|yesno:'true,false' }}"
+                     data-player-team="{{ player.ipl_team.short_name|default:'' }}">
+                    <div class="dt-avatar" style="{% if player.role == 'Batsman' %}background: linear-gradient(135deg, #f59e0b, #ef4444);{% elif player.role == 'Bowler' %}background: linear-gradient(135deg, #ef4444, #dc2626);{% elif player.role == 'All-Rounder' %}background: linear-gradient(135deg, #8b5cf6, #6d28d9);{% else %}background: linear-gradient(135deg, #0ea5e9, #0284c7);{% endif %}">
+                        {{ player.name|make_list|first }}
+                    </div>
+                    <div class="dt-player-info">
+                        <div class="dt-player-name">{{ player.name }}</div>
+                        <div class="dt-player-meta">{{ player.role }} · {{ player.country }}</div>
+                    </div>
+                    {% if player.is_overseas %}
+                    <span class="overseas-badge">OS</span>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Center: Cricket Field -->
+        <div class="cricket-field-container">
+            <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: var(--space-sm);">Drag players onto the field slots below</p>
+
+            <div class="cricket-field" id="cricket-field">
+                <!-- WK: slot 1 -->
+                <div class="field-slot" data-slot="1" style="top: 85%; left: 50%;" ondragover="handleDragOver(event)" ondrop="handleDrop(event)" ondragleave="handleDragLeave(event)">
+                    <span class="slot-number">#1</span>
+                    <div class="slot-placeholder">🧤</div>
+                    <div class="slot-placeholder-text">WK</div>
+                </div>
+
+                <!-- Top order: slots 2-4 -->
+                <div class="field-slot" data-slot="2" style="top: 68%; left: 25%;" ondragover="handleDragOver(event)" ondrop="handleDrop(event)" ondragleave="handleDragLeave(event)">
+                    <span class="slot-number">#2</span>
+                    <div class="slot-placeholder">🏏</div>
+                    <div class="slot-placeholder-text">BAT</div>
+                </div>
+                <div class="field-slot" data-slot="3" style="top: 68%; left: 50%;" ondragover="handleDragOver(event)" ondrop="handleDrop(event)" ondragleave="handleDragLeave(event)">
+                    <span class="slot-number">#3</span>
+                    <div class="slot-placeholder">🏏</div>
+                    <div class="slot-placeholder-text">BAT</div>
+                </div>
+                <div class="field-slot" data-slot="4" style="top: 68%; left: 75%;" ondragover="handleDragOver(event)" ondrop="handleDrop(event)" ondragleave="handleDragLeave(event)">
+                    <span class="slot-number">#4</span>
+                    <div class="slot-placeholder">🏏</div>
+                    <div class="slot-placeholder-text">BAT</div>
+                </div>
+
+                <!-- Middle order / All-rounders: slots 5-7 -->
+                <div class="field-slot" data-slot="5" style="top: 48%; left: 20%;" ondragover="handleDragOver(event)" ondrop="handleDrop(event)" ondragleave="handleDragLeave(event)">
+                    <span class="slot-number">#5</span>
+                    <div class="slot-placeholder">⚡</div>
+                    <div class="slot-placeholder-text">AR</div>
+                </div>
+                <div class="field-slot" data-slot="6" style="top: 48%; left: 50%;" ondragover="handleDragOver(event)" ondrop="handleDrop(event)" ondragleave="handleDragLeave(event)">
+                    <span class="slot-number">#6</span>
+                    <div class="slot-placeholder">⚡</div>
+                    <div class="slot-placeholder-text">AR</div>
+                </div>
+                <div class="field-slot" data-slot="7" style="top: 48%; left: 80%;" ondragover="handleDragOver(event)" ondrop="handleDrop(event)" ondragleave="handleDragLeave(event)">
+                    <span class="slot-number">#7</span>
+                    <div class="slot-placeholder">⚡</div>
+                    <div class="slot-placeholder-text">AR</div>
+                </div>
+
+                <!-- Bowlers: slots 8-11 -->
+                <div class="field-slot" data-slot="8" style="top: 28%; left: 15%;" ondragover="handleDragOver(event)" ondrop="handleDrop(event)" ondragleave="handleDragLeave(event)">
+                    <span class="slot-number">#8</span>
+                    <div class="slot-placeholder">🎳</div>
+                    <div class="slot-placeholder-text">BOWL</div>
+                </div>
+                <div class="field-slot" data-slot="9" style="top: 28%; left: 40%;" ondragover="handleDragOver(event)" ondrop="handleDrop(event)" ondragleave="handleDragLeave(event)">
+                    <span class="slot-number">#9</span>
+                    <div class="slot-placeholder">🎳</div>
+                    <div class="slot-placeholder-text">BOWL</div>
+                </div>
+                <div class="field-slot" data-slot="10" style="top: 28%; left: 62%;" ondragover="handleDragOver(event)" ondrop="handleDrop(event)" ondragleave="handleDragLeave(event)">
+                    <span class="slot-number">#10</span>
+                    <div class="slot-placeholder">🎳</div>
+                    <div class="slot-placeholder-text">BOWL</div>
+                </div>
+                <div class="field-slot" data-slot="11" style="top: 28%; left: 85%;" ondragover="handleDragOver(event)" ondrop="handleDrop(event)" ondragleave="handleDragLeave(event)">
+                    <span class="slot-number">#11</span>
+                    <div class="slot-placeholder">🎳</div>
+                    <div class="slot-placeholder-text">BOWL</div>
+                </div>
+
+                <!-- Impact Player: slot 12 -->
+                <div class="field-slot" data-slot="12" style="top: 12%; left: 50%;" ondragover="handleDragOver(event)" ondrop="handleDrop(event)" ondragleave="handleDragLeave(event)">
+                    <span class="slot-number">#12</span>
+                    <div class="slot-placeholder">💥</div>
+                    <div class="slot-placeholder-text">IMPACT</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right: Team Summary -->
+        <div class="team-summary-panel">
+            <h3>📋 Team Summary</h3>
+
+            <div class="team-rule">
+                <span>Players</span>
+                <span class="rule-status warning" id="rule-players">0 / 11</span>
+            </div>
+            <div class="team-rule">
+                <span>Overseas (max 4)</span>
+                <span class="rule-status valid" id="rule-overseas">0 / 4</span>
+            </div>
+            <div class="team-rule">
+                <span>Batsmen</span>
+                <span class="rule-status" id="rule-batsmen">0</span>
+            </div>
+            <div class="team-rule">
+                <span>Bowlers</span>
+                <span class="rule-status" id="rule-bowlers">0</span>
+            </div>
+            <div class="team-rule">
+                <span>All-Rounders</span>
+                <span class="rule-status" id="rule-allrounders">0</span>
+            </div>
+            <div class="team-rule">
+                <span>WK-Batsmen</span>
+                <span class="rule-status" id="rule-wk">0</span>
+            </div>
+
+            <h4 style="font-size: 0.85rem; margin-top: var(--space-lg); color: var(--text-muted);">Selected Players</h4>
+            <div class="selected-players-list" id="selected-players-list">
+                <p style="text-align: center; color: var(--text-muted); font-size: 0.8rem; padding: var(--space-md);">
+                    No players selected yet
+                </p>
+            </div>
+
+            <div class="team-actions">
+                <input type="text" class="dt-search-box" id="team-name-input" placeholder="Team name..." value="My Dream XI" style="margin-bottom: 0;">
+                <button class="btn btn-primary" onclick="saveDreamTeam()">💾 Save Team</button>
+                <button class="btn btn-danger btn-sm" onclick="clearTeam()">🗑️ Clear All</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// State
+const teamSlots = {};  // slot_number -> {id, name, role, country, overseas}
+const CSRF_TOKEN = '{{ csrf_token }}';
+
+// Drag & Drop
+document.querySelectorAll('.dt-player-item').forEach(item => {
+    item.addEventListener('dragstart', (e) => {
+        e.dataTransfer.setData('application/json', JSON.stringify({
+            id: item.dataset.playerId,
+            name: item.dataset.playerName,
+            role: item.dataset.playerRole,
+            country: item.dataset.playerCountry,
+            overseas: item.dataset.playerOverseas === 'true'
+        }));
+        item.classList.add('dragging');
+    });
+    item.addEventListener('dragend', () => {
+        item.classList.remove('dragging');
+    });
+});
+
+function handleDragOver(e) {
+    e.preventDefault();
+    e.currentTarget.classList.add('drag-over');
+}
+
+function handleDragLeave(e) {
+    e.currentTarget.classList.remove('drag-over');
+}
+
+function handleDrop(e) {
+    e.preventDefault();
+    e.currentTarget.classList.remove('drag-over');
+
+    const slot = e.currentTarget;
+    const slotNum = parseInt(slot.dataset.slot);
+
+    try {
+        const playerData = JSON.parse(e.dataTransfer.getData('application/json'));
+
+        // Check if player already in team
+        for (const [s, p] of Object.entries(teamSlots)) {
+            if (p.id === playerData.id) {
+                showToast('Player already in the team!', 'error');
+                return;
+            }
+        }
+
+        // Check overseas limit
+        if (playerData.overseas) {
+            const currentOverseas = Object.values(teamSlots).filter(p => p.overseas).length;
+            if (currentOverseas >= 4 && !teamSlots[slotNum]?.overseas) {
+                showToast('Maximum 4 overseas players allowed!', 'error');
+                return;
+            }
+        }
+
+        // Place player
+        teamSlots[slotNum] = playerData;
+        renderSlot(slot, playerData);
+        updateSummary();
+
+    } catch (err) {
+        console.error('Drop error:', err);
+    }
+}
+
+function renderSlot(slotEl, player) {
+    const roleColors = {
+        'Batsman': 'linear-gradient(135deg, #f59e0b, #ef4444)',
+        'Bowler': 'linear-gradient(135deg, #ef4444, #dc2626)',
+        'All-Rounder': 'linear-gradient(135deg, #8b5cf6, #6d28d9)',
+        'WK-Batsman': 'linear-gradient(135deg, #0ea5e9, #0284c7)'
+    };
+
+    slotEl.classList.add('filled');
+    slotEl.innerHTML = `
+        <span class="slot-number">#${slotEl.dataset.slot}</span>
+        <div class="slot-avatar" style="background: ${roleColors[player.role] || 'var(--gradient-primary)'}">
+            ${player.name.charAt(0)}
+        </div>
+        <div class="slot-name">${player.name.split(' ').pop()}</div>
+        <div class="slot-role">${player.role}</div>
+        <button class="remove-btn" onclick="removeFromSlot(${slotEl.dataset.slot}, event)">✕</button>
+    `;
+}
+
+function removeFromSlot(slotNum, e) {
+    if (e) e.stopPropagation();
+    delete teamSlots[slotNum];
+
+    const slot = document.querySelector(`.field-slot[data-slot="${slotNum}"]`);
+    const labels = {1:'WK', 2:'BAT', 3:'BAT', 4:'BAT', 5:'AR', 6:'AR', 7:'AR', 8:'BOWL', 9:'BOWL', 10:'BOWL', 11:'BOWL', 12:'IMPACT'};
+    const icons = {1:'🧤', 2:'🏏', 3:'🏏', 4:'🏏', 5:'⚡', 6:'⚡', 7:'⚡', 8:'🎳', 9:'🎳', 10:'🎳', 11:'🎳', 12:'💥'};
+
+    slot.classList.remove('filled');
+    slot.innerHTML = `
+        <span class="slot-number">#${slotNum}</span>
+        <div class="slot-placeholder">${icons[slotNum]}</div>
+        <div class="slot-placeholder-text">${labels[slotNum]}</div>
+    `;
+
+    // Re-attach drag listeners
+    slot.ondragover = handleDragOver;
+    slot.ondrop = handleDrop;
+    slot.ondragleave = handleDragLeave;
+
+    updateSummary();
+}
+
+function updateSummary() {
+    const players = Object.values(teamSlots);
+    const count = players.length;
+    const overseas = players.filter(p => p.overseas).length;
+    const batsmen = players.filter(p => p.role === 'Batsman').length;
+    const bowlers = players.filter(p => p.role === 'Bowler').length;
+    const allrounders = players.filter(p => p.role === 'All-Rounder').length;
+    const wk = players.filter(p => p.role === 'WK-Batsman').length;
+
+    // Update rule indicators
+    const rPlayers = document.getElementById('rule-players');
+    rPlayers.textContent = `${count} / 11`;
+    rPlayers.className = 'rule-status ' + (count === 11 ? 'valid' : count > 11 ? 'invalid' : 'warning');
+
+    const rOverseas = document.getElementById('rule-overseas');
+    rOverseas.textContent = `${overseas} / 4`;
+    rOverseas.className = 'rule-status ' + (overseas <= 4 ? 'valid' : 'invalid');
+
+    document.getElementById('rule-batsmen').textContent = batsmen;
+    document.getElementById('rule-bowlers').textContent = bowlers;
+    document.getElementById('rule-allrounders').textContent = allrounders;
+    document.getElementById('rule-wk').textContent = wk;
+
+    // Update selected list
+    const listEl = document.getElementById('selected-players-list');
+    if (count === 0) {
+        listEl.innerHTML = '<p style="text-align:center;color:var(--text-muted);font-size:0.8rem;padding:var(--space-md);">No players selected yet</p>';
+    } else {
+        listEl.innerHTML = Object.entries(teamSlots)
+            .sort(([a], [b]) => parseInt(a) - parseInt(b))
+            .map(([slot, p]) => `
+                <div class="selected-player-item">
+                    <span class="sel-number">${slot}</span>
+                    <span style="flex:1;">${p.name}</span>
+                    <span style="font-size:0.7rem;color:var(--text-muted);">${p.role}</span>
+                </div>
+            `).join('');
+    }
+}
+
+function clearTeam() {
+    for (const slotNum of Object.keys(teamSlots)) {
+        removeFromSlot(parseInt(slotNum));
+    }
+    showToast('Team cleared');
+}
+
+function saveDreamTeam() {
+    const entries = Object.entries(teamSlots);
+    if (entries.length === 0) {
+        showToast('Add at least one player!', 'error');
+        return;
+    }
+
+    const teamName = document.getElementById('team-name-input').value || 'My Dream XI';
+    const slots = entries.map(([slot, p]) => ({
+        slot_number: parseInt(slot),
+        player_id: parseInt(p.id),
+        role_label: p.role
+    }));
+
+    fetch('/api/dreamteam/save/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': CSRF_TOKEN
+        },
+        body: JSON.stringify({ name: teamName, slots: slots })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            showToast(`Team "${teamName}" saved!`);
+        } else {
+            showToast(data.error || 'Failed to save', 'error');
+        }
+    })
+    .catch(() => showToast('Network error', 'error'));
+}
+
+// Search & Filter for player list
+document.getElementById('dt-search').addEventListener('input', function() {
+    const q = this.value.toLowerCase();
+    document.querySelectorAll('.dt-player-item').forEach(item => {
+        const name = item.dataset.playerName.toLowerCase();
+        const visible = name.includes(q);
+        item.style.display = visible ? '' : 'none';
+    });
+});
+
+function filterDTPlayers(role) {
+    document.querySelectorAll('.dreamteam-player-list .filter-btn').forEach(b => {
+        b.classList.toggle('active', b.dataset.role === role);
+    });
+    document.querySelectorAll('.dt-player-item').forEach(item => {
+        const match = !role || item.dataset.playerRole === role;
+        item.style.display = match ? '' : 'none';
+    });
+}
+</script>
+{% endblock %}
