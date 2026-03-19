@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}Saved Dream Teams — Cricket Analyst{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: var(--space-xl);">
+    <div class="section-header">
+        <h1 class="section-title">📋 Saved <span class="accent">Dream Teams</span></h1>
+        <a href="{% url 'dreamteam_builder' %}" class="btn btn-primary btn-sm">+ Build New Team</a>
+    </div>
+
+    <div class="saved-teams-grid">
+        {% for team in teams %}
+        <div class="saved-team-card">
+            <h3>{{ team.name }}</h3>
+            <div class="team-date">Created {{ team.created_at|date:"M d, Y H:i" }}</div>
+            <div class="team-players-preview">
+                {% for slot in team.slots.all %}
+                <span class="preview-chip">{{ slot.player.name }}</span>
+                {% endfor %}
+            </div>
+            <div style="margin-top: var(--space-md); display: flex; gap: var(--space-sm);">
+                <a href="{% url 'dreamteam_builder' %}?load={{ team.pk }}" class="btn btn-secondary btn-sm" style="flex: 1;">✏️ Edit</a>
+                <form method="post" action="{% url 'dreamteam_delete' team.pk %}" style="flex: 0;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Delete this team?')">🗑️</button>
+                </form>
+            </div>
+        </div>
+        {% empty %}
+        <div class="empty-state" style="grid-column: 1 / -1;">
+            <div class="empty-icon">⭐</div>
+            <p>No saved Dream Teams yet. Build your first Dream XI!</p>
+            <a href="{% url 'dreamteam_builder' %}" class="btn btn-primary" style="margin-top: var(--space-md);">Build Dream XI</a>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
