@@ -63,12 +63,15 @@ WSGI_APPLICATION = 'cricket_analyst.wsgi.application'
 
 # Database
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": "<YOUR_DB_NAME>",
+        "USER": "<YOUR_DB_USER>",
+        "PASSWORD": "<YOUR_DB_PASS>",
+        "HOST": "<YOUR_DB_HOST>",
+        "PORT": "5432",
     }
 }
-
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
