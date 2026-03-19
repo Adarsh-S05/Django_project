@@ -60,15 +60,14 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'cricket_analyst.wsgi.application'
 
-
-# Database
+#database
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": "your_database_name",   # replace this
-        "USER": "your_db_user",         # replace this
-        "PASSWORD": "your_db_password", # replace this
-        "HOST": "your_db_host",         # replace this
+        "NAME": "your_database_name",
+        "USER": "your_database_user",
+        "PASSWORD": "your_database_password",
+        "HOST": "your_database_host",
         "PORT": "5432",
     }
 }
@@ -90,9 +89,7 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [
-    BASE_DIR / 'static',
-]
+STATIC_ROOT = BASE_DIR / "staticfiles"
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 # Media files
