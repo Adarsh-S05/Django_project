@@ -65,14 +65,13 @@ WSGI_APPLICATION = 'cricket_analyst.wsgi.application'
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": "<YOUR_DB_NAME>",
-        "USER": "<YOUR_DB_USER>",
-        "PASSWORD": "<YOUR_DB_PASS>",
-        "HOST": "<YOUR_DB_HOST>",
+        "NAME": "your_database_name",   # replace this
+        "USER": "your_db_user",         # replace this
+        "PASSWORD": "your_db_password", # replace this
+        "HOST": "your_db_host",         # replace this
         "PORT": "5432",
     }
 }
-
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
